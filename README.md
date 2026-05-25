@@ -1,98 +1,70 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Laboratorio: Conexión NestJS a Ethereum Sepolia (Clean Architecture)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Este proyecto implementa los principios de **Clean Architecture** conectando una API REST en **NestJS** a la red de prueba (testnet) **Ethereum Sepolia** utilizando la librería **Ethers.js** para leer datos en tiempo real de un Smart Contract (USDC).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 🛠️ Estructura del Proyecto (Clean Architecture)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+El proyecto sigue una separación clara de responsabilidades:
+*   **Capa de Infraestructura / Adaptador (`src/blockchain/blockchain-adapter.service.ts`):** Encapsula todos los detalles técnicos y librerías externas (`ethers.js`), inicializando el proveedor de RPC y conectando con el Smart Contract de USDC.
+*   **Capa del Controlador (`src/blockchain/blockchain.controller.ts`):** Actúa como el punto de entrada HTTP (API REST), delegando el procesamiento de datos al servicio y retornando respuestas formateadas en JSON.
 
-## Project setup
+---
 
-```bash
-$ npm install
-```
+## 🚀 Requisitos Previos
 
-## Compile and run the project
+1.  **Node.js** (v18 o superior recomendado)
+2.  Una cuenta gratuita en [Alchemy](https://www.alchemy.com/) o [Infura](https://www.infura.io/) para obtener una API Key de la red de prueba **Ethereum Sepolia**.
 
-```bash
-# development
-$ npm run start
+---
 
-# watch mode
-$ npm run start:dev
+## ⚙️ Instalación y Configuración
 
-# production mode
-$ npm run start:prod
-```
+1.  **Instalar dependencias:**
+    ```bash
+    npm install
+    ```
 
-## Run tests
+2.  **Configurar variables de entorno:**
+    Crea una copia de `.env.example` con el nombre `.env`:
+    ```bash
+    cp .env.example .env
+    ```
+    Edita el archivo `.env` e introduce tu clave API en la variable `SEPOLIA_RPC_URL`. Ejemplo:
+    ```env
+    SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/TuClaveDeAlchemyAqui
+    USDC_CONTRACT_ADDRESS=0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
+    ```
 
-```bash
-# unit tests
-$ npm run test
+---
 
-# e2e tests
-$ npm run test:e2e
+## 🏃 Cómo Ejecutar la Aplicación
 
-# test coverage
-$ npm run test:cov
-```
+*   **Modo desarrollo:**
+    ```bash
+    npm run start:dev
+    ```
+    La aplicación se iniciará en `http://localhost:3000`.
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## 📡 Endpoints del API
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 1. Obtener información del Smart Contract de USDC
+*   **Método:** `GET`
+*   **Ruta:** `/api/token-info`
+*   **Descripción:** Consulta directamente el Smart Contract de USDC en Sepolia para obtener el nombre, símbolo y el suministro total (totalSupply) actual.
+*   **URL de prueba:** `http://localhost:3000/api/token-info`
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+### 2. Consultar balance de USDC de una dirección
+*   **Método:** `GET`
+*   **Ruta:** `/api/balance/:address`
+*   **Descripción:** Retorna el saldo actual de USDC de cualquier billetera en la red de Sepolia.
+*   **Ejemplo:** `http://localhost:3000/api/balance/0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238`
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### 3. Consultar detalles de una transacción por Hash
+*   **Método:** `GET`
+*   **Ruta:** `/api/transaction/:hash`
+*   **Descripción:** Consulta los detalles técnicos de una transacción específica en Sepolia (remitente, receptor, valor, gas consumido, y cantidad de confirmaciones de bloque).
+*   **Ejemplo:** `http://localhost:3000/api/transaction/0xYourTransactionHashHere`
